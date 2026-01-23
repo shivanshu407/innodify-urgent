@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Upload, Trash2, Search, Bold, List, Type, Heading3, Heading4 } from "lucide-react";
+import { ArrowLeft, Save, Upload, Trash2, Search, Bold, List, Type, Heading3, Heading4, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -288,6 +288,34 @@ export default function AddBlogPage() {
                                     >
                                         <List size={16} />
                                     </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const url = prompt("Enter image URL:");
+                                            const alt = prompt("Enter image description (alt text):");
+                                            if (url) {
+                                                insertFormatting(`![${alt || ""}](${url})`);
+                                            }
+                                        }}
+                                        className="p-1.5 hover:bg-[#2a2f36] rounded text-[#9ca3af] hover:text-[#00adef] transition-all"
+                                        title="Insert Image"
+                                    >
+                                        <ImageIcon size={16} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const text = prompt("Enter link text:");
+                                            const url = prompt("Enter URL (e.g. /services or https://google.com):");
+                                            if (text && url) {
+                                                insertFormatting(`[${text}](${url})`);
+                                            }
+                                        }}
+                                        className="p-1.5 hover:bg-[#2a2f36] rounded text-[#9ca3af] hover:text-[#00adef] transition-all"
+                                        title="Insert Link"
+                                    >
+                                        <LinkIcon size={16} />
+                                    </button>
                                 </div>
                             </div>
                             <textarea
@@ -304,7 +332,7 @@ export default function AddBlogPage() {
                             />
                             <p className="text-[10px] text-[#4b5563] mt-2 flex items-center gap-1">
                                 <Type size={10} />
-                                Markdown formatting supported: ### Header, **Bold**, - Bullet
+                                Markdown supported: ### Header, **Bold**, - Bullet, ![Alt](URL) Image, [Text](URL) Link
                             </p>
                         </div>
 

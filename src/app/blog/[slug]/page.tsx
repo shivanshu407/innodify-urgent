@@ -29,6 +29,39 @@ export default function BlogPostPage() {
         })
         .slice(0, 3);
 
+    const renderText = (text: string) => {
+        const parts = text.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
+        return parts.map((part, i) => {
+            if (part.startsWith("**") && part.endsWith("**")) {
+                return (
+                    <strong key={i} className="text-white font-semibold">
+                        {part.slice(2, -2)}
+                    </strong>
+                );
+            }
+            if (part.startsWith("[") && part.includes("](")) {
+                const match = part.match(/\[(.*?)\]\((.*?)\)/);
+                if (match) {
+                    const label = match[1];
+                    const url = match[2];
+                    const isExternal = url.startsWith("http");
+                    return (
+                        <Link
+                            key={i}
+                            href={url}
+                            target={isExternal ? "_blank" : undefined}
+                            rel={isExternal ? "noopener noreferrer" : undefined}
+                            className="text-[#00adef] hover:underline transition-all"
+                        >
+                            {label}
+                        </Link>
+                    );
+                }
+            }
+            return part;
+        });
+    };
+
     return (
         <section className="relative min-h-screen bg-[#0e1012] py-24 overflow-hidden">
             {/* Background elements */}
@@ -107,39 +140,41 @@ export default function BlogPostPage() {
                                     return <h4 key={i} className="text-xl font-serif text-white mt-6 mb-3">{line.replace('#### ', '')}</h4>;
                                 }
                                 if (line.startsWith('- ')) {
-                                    const content = line.replace('- ', '');
-                                    // Basic bold handling within list items
-                                    const parts = content.split(/(\*\*.*?\*\*)/g);
                                     return (
                                         <div key={i} className="flex gap-3 ml-4">
                                             <span className="text-[#00adef]">•</span>
-                                            <p>
-                                                {parts.map((part, pi) => {
-                                                    if (part.startsWith('**') && part.endsWith('**')) {
-                                                        return <strong key={pi} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
-                                                    }
-                                                    return part;
-                                                })}
-                                            </p>
+                                            <p>{renderText(line.replace('- ', ''))}</p>
                                         </div>
                                     );
                                 }
+                                if (line.startsWith('![')) {
+                                    const match = line.match(/!\[(.*?)\]\((.*?)\)/);
+                                    if (match) {
+                                        const alt = match[1];
+                                        const src = match[2];
+                                        return (
+                                            <div key={i} className="my-8 space-y-2 flex flex-col items-center">
+                                                <img
+                                                    src={src}
+                                                    alt={alt}
+                                                    className="w-[700px] h-[400px] object-cover rounded-xl border border-[#2a2f36] shadow-2xl"
+                                                />
+                                                {alt && (
+                                                    <p className="text-center text-sm text-[#6b7280] italic max-w-[400px]">
+                                                        {alt}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+                                }
+
                                 if (line.trim() === '') {
                                     return <div key={i} className="h-2" />;
                                 }
 
-                                // Basic bold handling for regular paragraphs
-                                const parts = line.split(/(\*\*.*?\*\*)/g);
-                                return (
-                                    <p key={i}>
-                                        {parts.map((part, pi) => {
-                                            if (part.startsWith('**') && part.endsWith('**')) {
-                                                return <strong key={pi} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
-                                            }
-                                            return part;
-                                        })}
-                                    </p>
-                                );
+                                // Basic bold and link handling for regular paragraphs
+                                return <p key={i}>{renderText(line)}</p>;
                             })}
                         </div>
                     </div>
