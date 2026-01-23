@@ -47,38 +47,43 @@ function BlogPostsSection() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {posts.map((post, index) => (
-                        <motion.article
-                            key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                            className="group relative cursor-pointer"
-                        >
+                        <Link key={index} href={`/blog/${post.slug}`}>
+                            <motion.article
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className="group relative cursor-pointer"
+                            >
 
 
-                            <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-gray-100">
-                                <div
-                                    className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-                                    style={{ backgroundImage: `url(${post.image})` }}
-                                />
-                            </div>
-                            <span className="text-sm font-medium text-[#00adef]">{post.category}</span>
-                            <h2 className="mt-2 text-xl font-semibold text-[#0e1012] group-hover:text-[#00adef] transition-colors line-clamp-2">
-                                {post.title}
-                            </h2>
-                            <p className="mt-2 text-gray-600 text-sm line-clamp-2">{post.excerpt}</p>
-                            <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                                <span className="flex items-center gap-1">
-                                    <Calendar size={12} />
-                                    {post.date}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <Clock size={12} />
-                                    {post.readTime}
-                                </span>
-                            </div>
-                        </motion.article>
+                                <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-gray-100">
+                                    <div
+                                        className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                                        style={{ backgroundImage: `url(${post.image})` }}
+                                    />
+                                </div>
+                                <span className="text-sm font-medium text-[#00adef]">{post.category}</span>
+                                <h2 className="mt-2 text-xl font-semibold text-[#0e1012] group-hover:text-[#00adef] transition-colors line-clamp-2">
+                                    {post.title}
+                                </h2>
+                                <p className="mt-2 text-gray-600 text-sm line-clamp-2">{post.excerpt}</p>
+                                <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                        <User size={12} />
+                                        {post.author}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Calendar size={12} />
+                                        {post.date}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Clock size={12} />
+                                        {post.readTime}
+                                    </span>
+                                </div>
+                            </motion.article>
+                        </Link>
                     ))}
                 </div>
             </div>

@@ -1,16 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Upload, Trash2, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BlogPost, defaultBlogs } from "@/data/blogs";
-import { addBlog, deleteBlog } from "@/actions/blogActions";
+import { addBlog, deleteBlog, updateBlog } from "@/actions/blogActions";
 
 export default function AddBlogPage() {
     const router = useRouter();
 
+    const [editingSlug, setEditingSlug] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const [formData, setFormData] = useState<Partial<BlogPost>>({
         author: "Innodify Admin",
         date: new Date().toLocaleDateString("en-US", {
@@ -29,17 +31,34 @@ export default function AddBlogPage() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const filteredBlogs = searchQuery.length >= 2
+        ? defaultBlogs.filter(post => post.title.toLowerCase().includes(searchQuery.toLowerCase()))
+        : defaultBlogs;
+
+    const handleEdit = (post: BlogPost) => {
+        setFormData(post);
+        setEditingSlug(post.slug);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.title || !formData.excerpt || !formData.category) {
+        if (!formData.title || !formData.excerpt || !formData.category || !formData.content) {
             alert("Please fill in all required fields.");
             return;
         }
 
+        const slug = (formData.title || "")
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-");
+
         const newPost: BlogPost = {
             title: formData.title || "Untitled",
+            slug: slug || "untitled",
             excerpt: formData.excerpt || "",
+            content: formData.content || "",
             author: formData.author || "Innodify Admin",
             date: formData.date || new Date().toLocaleDateString(),
             readTime: formData.readTime || "5 min read",
@@ -49,14 +68,33 @@ export default function AddBlogPage() {
                 "https://images.unsplash.com/photo-1499750310159-5254f4121c6d?w=600&q=80",
         };
 
-        const result = await addBlog(newPost);
+        let result;
+        if (editingSlug) {
+            result = await updateBlog(editingSlug, newPost);
+        } else {
+            result = await addBlog(newPost);
+        }
 
         if (result.success) {
-            alert("Blog post added successfully!");
-            router.push("/blog");
-            router.refresh();
+            alert(editingSlug ? "Blog post updated successfully!" : "Blog post added successfully!");
+            if (editingSlug) {
+                setEditingSlug(null);
+                setFormData({
+                    author: "Innodify Admin",
+                    date: new Date().toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                    }),
+                });
+                router.refresh();
+                window.location.reload();
+            } else {
+                router.push("/blog");
+                router.refresh();
+            }
         } else {
-            alert("Failed to add blog post. " + result.error);
+            alert("Failed to save blog post. " + result.error);
         }
     };
 
@@ -84,27 +122,86 @@ export default function AddBlogPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h1 className="text-3xl font-serif text-[#e5e7eb] mb-8">
-                        Create New Post
-                    </h1>
+                    <div className="flex items-center justify-between mb-8">
+                        <h1 className="text-3xl font-serif text-[#e5e7eb]">
+                            {editingSlug ? "Edit Post" : "Create New Post"}
+                        </h1>
+                        {editingSlug && (
+                            <button
+                                onClick={() => {
+                                    setEditingSlug(null);
+                                    setFormData({ author: "Innodify Admin" });
+                                }}
+                                className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
-                                Title
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                placeholder="Enter post title"
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
-                placeholder:text-[#6b7280] border border-[#2a2f36]
-                focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
-                outline-none transition-all"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Title */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
+                                    Title
+                                </label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title || ""}
+                                    placeholder="Enter post title"
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
+                    placeholder:text-[#6b7280] border border-[#2a2f36]
+                    focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                    outline-none transition-all"
+                                />
+                            </div>
+
+                            {/* Author */}
+                            <div>
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
+                                    Author
+                                </label>
+                                <input
+                                    type="text"
+                                    name="author"
+                                    value={formData.author || ""}
+                                    placeholder="Author name"
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
+                    placeholder:text-[#6b7280] border border-[#2a2f36]
+                    focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                    outline-none transition-all"
+                                />
+                            </div>
+
+                            {/* Category */}
+                            <div>
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
+                                    Category
+                                </label>
+                                <select
+                                    name="category"
+                                    value={formData.category || ""}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
+                      border border-[#2a2f36]
+                      focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                      outline-none transition-all"
+                                >
+                                    <option value="">Select Category</option>
+                                    <option value="Development">Development</option>
+                                    <option value="UX Design">UX Design</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Tutorial">Tutorial</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* Excerpt */}
@@ -114,7 +211,8 @@ export default function AddBlogPage() {
                             </label>
                             <textarea
                                 name="excerpt"
-                                rows={3}
+                                value={formData.excerpt || ""}
+                                rows={2}
                                 placeholder="Brief summary of the post"
                                 onChange={handleChange}
                                 required
@@ -125,37 +223,35 @@ export default function AddBlogPage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Category */}
-                            <div>
-                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
-                                    Category
-                                </label>
-                                <select
-                                    name="category"
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
-                  border border-[#2a2f36]
-                  focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
-                  outline-none transition-all"
-                                >
-                                    <option value="">Select Category</option>
-                                    <option value="Development">Development</option>
-                                    <option value="UX Design">UX Design</option>
-                                    <option value="Technology">Technology</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Tutorial">Tutorial</option>
-                                </select>
-                            </div>
+                        {/* Content */}
+                        <div>
+                            <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
+                                Full Content
+                            </label>
+                            <textarea
+                                name="content"
+                                value={formData.content || ""}
+                                rows={8}
+                                placeholder="Write the full blog post content here..."
+                                onChange={handleChange}
+                                required
+                                className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
+                placeholder:text-[#6b7280] border border-[#2a2f36]
+                focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                outline-none transition-all"
+                            />
+                        </div>
 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Read Time */}
-                            <div>
+                            <div className="md:col-span-1">
                                 <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
                                     Read Time
                                 </label>
                                 <input
                                     type="text"
                                     name="readTime"
+                                    value={formData.readTime || ""}
                                     placeholder="e.g. 5 min read"
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
@@ -164,32 +260,33 @@ export default function AddBlogPage() {
                   outline-none transition-all"
                                 />
                             </div>
-                        </div>
 
-                        {/* Image URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
-                                Image URL
-                            </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="url"
-                                    name="image"
-                                    placeholder="https://example.com/image.jpg"
-                                    onChange={handleChange}
-                                    className="flex-1 px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
-                  placeholder:text-[#6b7280] border border-[#2a2f36]
-                  focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
-                  outline-none transition-all"
-                                />
-                                <div className="px-4 py-3 bg-[#15181c] rounded-lg border border-[#2a2f36] text-[#6b7280]">
-                                    <Upload size={20} />
+                            {/* Image URL */}
+                            <div className="md:col-span-1">
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
+                                    Image URL
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="url"
+                                        name="image"
+                                        value={formData.image || ""}
+                                        placeholder="https://example.com/image.jpg"
+                                        onChange={handleChange}
+                                        className="flex-1 px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
+                      placeholder:text-[#6b7280] border border-[#2a2f36]
+                      focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                      outline-none transition-all"
+                                    />
+                                    <div className="px-4 py-3 bg-[#15181c] rounded-lg border border-[#2a2f36] text-[#6b7280]">
+                                        <Upload size={20} />
+                                    </div>
                                 </div>
                             </div>
-                            <p className="text-xs text-[#6b7280] mt-1">
-                                Leave blank for a default image.
-                            </p>
                         </div>
+                        <p className="text-xs text-[#6b7280] mt-[-1rem]">
+                            Leave blank for a default image.
+                        </p>
 
                         {/* Submit */}
                         <button
@@ -199,7 +296,7 @@ export default function AddBlogPage() {
               transition-all flex items-center justify-center gap-2"
                         >
                             <Save size={20} />
-                            Publish Post
+                            {editingSlug ? "Update Post" : "Publish Post"}
                         </button>
                     </form>
                 </motion.div>
@@ -211,11 +308,26 @@ export default function AddBlogPage() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="mt-24"
                 >
-                    <h2 className="text-2xl font-serif text-[#e5e7eb] mb-8 border-b border-[#2a2f36] pb-4">
-                        Manage Existing Posts
-                    </h2>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#2a2f36] pb-4">
+                        <h2 className="text-2xl font-serif text-[#e5e7eb]">
+                            Manage Existing Posts
+                        </h2>
+                        <div className="relative w-full md:w-64">
+                            <input
+                                type="text"
+                                placeholder="Search by title..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 rounded-lg bg-[#15181c] text-[#e5e7eb] 
+                                    placeholder:text-[#6b7280] border border-[#2a2f36]
+                                    focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
+                                    outline-none transition-all text-sm"
+                            />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280]" size={16} />
+                        </div>
+                    </div>
                     <div className="space-y-4">
-                        {defaultBlogs.map((post, index) => (
+                        {filteredBlogs.map((post, index) => (
                             <div
                                 key={index}
                                 className="bg-[#15181c] p-4 rounded-lg border border-[#2a2f36] flex items-center justify-between group"
@@ -230,24 +342,34 @@ export default function AddBlogPage() {
                                         <p className="text-xs text-[#6b7280]">{post.category} • {post.date}</p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={async () => {
-                                        if (confirm(`Are you sure you want to delete "${post.title}"?`)) {
-                                            const result = await deleteBlog(post.title);
-                                            if (result.success) {
-                                                alert("Post deleted successfully!");
-                                                window.location.reload();
-                                            } else {
-                                                alert("Failed to delete: " + result.error);
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleEdit(post)}
+                                        className="p-2 text-[#6b7280] hover:text-[#00adef] hover:bg-[#00adef]/10 rounded-lg transition-all"
+                                        title="Edit Post"
+                                    >
+                                        <Save size={18} />
+                                        <span className="sr-only">Edit</span>
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm(`Are you sure you want to delete "${post.title}"?`)) {
+                                                const result = await deleteBlog(post.slug);
+                                                if (result.success) {
+                                                    alert("Post deleted successfully!");
+                                                    window.location.reload();
+                                                } else {
+                                                    alert("Failed to delete: " + result.error);
+                                                }
                                             }
-                                        }
-                                    }}
-                                    className="p-2 text-[#6b7280] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                                    title="Delete Post"
-                                >
-                                    <Trash2 size={18} />
-                                    <span className="sr-only">Delete</span>
-                                </button>
+                                        }}
+                                        className="p-2 text-[#6b7280] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                        title="Delete Post"
+                                    >
+                                        <Trash2 size={18} />
+                                        <span className="sr-only">Delete</span>
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -256,4 +378,3 @@ export default function AddBlogPage() {
         </section>
     );
 }
-
