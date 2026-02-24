@@ -32,6 +32,28 @@ function CaseStudiesHero() {
 function CaseStudiesGrid() {
     const caseStudies = [
         {
+            title: "Custom Flutter App for CVD Diamond Jewellery Brand",
+            client: "Salt & Glitz",
+            clientColor: "#E91E63",
+            tags: ["Flutter", "iOS", "Android"],
+            stat: "2",
+            statLabel: "App Stores",
+            description: "Custom Flutter mobile app published on both App Store and Play Store for a premium CVD diamond jewellery brand.",
+            image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
+            link: "/case-studies/salt-and-glitz-app"
+        },
+        {
+            title: "Custom eCommerce Website for CVD Diamond Jewellery",
+            client: "Salt & Glitz",
+            clientColor: "#E91E63",
+            tags: ["eCommerce", "Custom Website", "Web Development"],
+            stat: "100%",
+            statLabel: "Custom Built",
+            description: "Fully custom eCommerce website for Salt & Glitz to showcase and sell their premium CVD lab-grown diamond jewellery collection.",
+            image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+            link: "/case-studies/salt-and-glitz-website"
+        },
+        {
             title: "Shopify eCommerce Store for Premium Jewellery Brand",
             client: "D Khushalbhai Jewellers",
             clientColor: "#D4AF37",
@@ -60,22 +82,23 @@ function CaseStudiesGrid() {
             <div className="container mx-auto px-6">
                 <div className="grid md:grid-cols-2 gap-8">
                     {caseStudies.map((study, index) => (
-                        <Link key={study.title} href={study.link || "#"}>
-                            <motion.article
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                className="bg-[#f8f8f8] rounded-2xl overflow-hidden group cursor-pointer hover:shadow-xl transition-shadow block h-full"
-                            >
+                        <motion.article
+                            key={study.title}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                            className="bg-[#f8f8f8] rounded-2xl overflow-hidden group hover:shadow-xl transition-shadow h-full"
+                        >
+                            <Link href={study.link || "#"} className="block h-full">
                                 <div className="aspect-video overflow-hidden">
                                     <div
                                         className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
                                         style={{ backgroundImage: `url(${study.image})` }}
                                     />
                                 </div>
-                                <div className="p-8">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div className="p-6 md:p-8">
+                                    <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                                         <span style={{ color: study.clientColor }} className="font-bold text-lg">
                                             {study.client}
                                         </span>
@@ -102,8 +125,8 @@ function CaseStudiesGrid() {
                                         </span>
                                     </div>
                                 </div>
-                            </motion.article>
-                        </Link>
+                            </Link>
+                        </motion.article>
                     ))}
                 </div>
             </div>

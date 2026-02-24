@@ -1,11 +1,35 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 const caseStudies = [
+    {
+        id: "salt-glitz-app",
+        title: "Custom Flutter App for CVD Diamond Jewellery",
+        category: "Flutter App",
+        image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
+        stats: "2 App Stores",
+        link: "/case-studies/salt-and-glitz-app"
+    },
+    {
+        id: "salt-glitz-website",
+        title: "Custom eCommerce Website for CVD Diamond Jewellery",
+        category: "eCommerce",
+        image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+        stats: "100% Custom",
+        link: "/case-studies/salt-and-glitz-website"
+    },
+    {
+        id: "dkhushalbhai",
+        title: "Shopify Store for Premium Jewellery Brand",
+        category: "Shopify",
+        image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+        stats: "Full eCommerce",
+        link: "/case-studies/dkhushalbhai-jewellers"
+    },
     {
         id: "mahalaxmi",
         title: "Cloud-Based Transformation of Real Estate Operations",
@@ -13,30 +37,6 @@ const caseStudies = [
         image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
         stats: "100% Security",
         link: "/case-studies/mahalaxmi-real-estate"
-    },
-    {
-        id: "umniah",
-        title: "224% Speed Increase for Umniah Telecom",
-        category: "Performance",
-        image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80",
-        stats: "2.5x Faster",
-        link: "/case-studies/umniah"
-    },
-    {
-        id: "pure",
-        title: "Headless Commerce for Pure Daily Care",
-        category: "Headless Build",
-        image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
-        stats: "45% Conv. Rate",
-        link: "/case-studies/pure-daily-care"
-    },
-    {
-        id: "stylehouse",
-        title: "Seamless Migration for StyleHouse",
-        category: "Migration",
-        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-        stats: "0 Downtime",
-        link: "/case-studies/stylehouse"
     }
 ];
 
@@ -70,36 +70,55 @@ export function DarkCaseStudiesSection() {
                 left: newScrollLeft,
                 behavior: "smooth"
             });
-            setTimeout(checkScroll, 300); // Check after scroll animation
+            setTimeout(checkScroll, 300);
         }
     };
 
     return (
-        <section className="py-24 bg-white border-t border-gray-100">
-            <div className="container mx-auto px-6">
+        <section className="py-24 bg-[#f8f9fa] relative overflow-hidden">
+            {/* Background effects */}
+            <div className="absolute inset-0">
+                <motion.div
+                    className="absolute w-[600px] h-[600px] rounded-full bg-[#00adef]/5 blur-3xl"
+                    style={{ top: '20%', right: '-15%' }}
+                    animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                />
+            </div>
+
+            <div className="container mx-auto px-6 relative z-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-                    <div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
                         <span className="text-[#00adef] italic font-serif text-lg">Our Work</span>
                         <h2 className="mt-4 text-4xl md:text-5xl font-serif text-[#0e1012]">
-                            Selected <span className="text-[#00adef] italic">case studies</span>
+                            Selected <span className="text-gradient-liquid italic">case studies</span>
                         </h2>
-                    </div>
+                    </motion.div>
 
+                    {/* Navigation buttons */}
                     <div className="flex gap-4">
-                        <button
+                        <motion.button
                             onClick={() => scroll("left")}
                             disabled={!canScrollLeft}
-                            className={`w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-[#0e1012] transition-all ${!canScrollLeft ? "opacity-30 cursor-not-allowed" : "hover:bg-[#0e1012] hover:text-white hover:border-[#0e1012]"}`}
+                            className={`w-12 h-12 rounded-full liquid-glass-glow flex items-center justify-center text-[#0e1012] transition-all ${!canScrollLeft ? "opacity-30 cursor-not-allowed" : "hover:scale-110"}`}
+                            whileHover={canScrollLeft ? { scale: 1.1 } : {}}
+                            whileTap={canScrollLeft ? { scale: 0.95 } : {}}
                         >
                             <ArrowLeft size={20} />
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
                             onClick={() => scroll("right")}
                             disabled={!canScrollRight}
-                            className={`w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-[#0e1012] transition-all ${!canScrollRight ? "opacity-30 cursor-not-allowed" : "hover:bg-[#0e1012] hover:text-white hover:border-[#0e1012]"}`}
+                            className={`w-12 h-12 rounded-full liquid-glass-glow flex items-center justify-center text-[#0e1012] transition-all ${!canScrollRight ? "opacity-30 cursor-not-allowed" : "hover:scale-110"}`}
+                            whileHover={canScrollRight ? { scale: 1.1 } : {}}
+                            whileTap={canScrollRight ? { scale: 0.95 } : {}}
                         >
                             <ArrowRight size={20} />
-                        </button>
+                        </motion.button>
                     </div>
                 </div>
 
@@ -107,8 +126,7 @@ export function DarkCaseStudiesSection() {
                 <div
                     ref={scrollContainerRef}
                     onScroll={checkScroll}
-                    className="flex gap-8 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    className="flex gap-6 md:gap-8 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0"
                 >
                     {caseStudies.map((study, index) => (
                         <motion.div
@@ -117,34 +135,45 @@ export function DarkCaseStudiesSection() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            className="min-w-[85vw] md:min-w-[400px] lg:min-w-[500px] snap-center group relative cursor-pointer"
+                            className="min-w-[85vw] md:min-w-[400px] lg:min-w-[480px] snap-center group relative"
                         >
-                            <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-6 relative shadow-lg">
-                                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors z-10" />
-                                <motion.img
-                                    whileHover={{ scale: 1.05 }}
-                                    transition={{ duration: 0.5 }}
-                                    src={study.image}
-                                    alt={study.title}
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute top-4 left-4 z-20">
-                                    <span className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-xs font-semibold text-[#0e1012] uppercase tracking-wider shadow-sm">
-                                        {study.category}
+                            <Link href={study.link} className="block">
+                                {/* Image container */}
+                                <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-6 relative liquid-glass-glow">
+                                    <motion.div
+                                        className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                        style={{
+                                            background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 100%)'
+                                        }}
+                                    />
+
+                                    <motion.img
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ duration: 0.5 }}
+                                        src={study.image}
+                                        alt={study.title}
+                                        className="w-full h-full object-cover"
+                                    />
+
+                                    {/* Category badge */}
+                                    <div className="absolute top-4 left-4 z-20">
+                                        <span className="px-4 py-2 liquid-glass-glow rounded-full text-xs font-semibold text-[#0e1012] uppercase tracking-wider">
+                                            {study.category}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <h3 className="text-xl md:text-2xl font-bold text-[#0e1012] group-hover:text-gradient-liquid transition-colors mb-2">
+                                    {study.title}
+                                </h3>
+                                <div className="flex items-center gap-4 text-gray-500">
+                                    <span className="text-[#00adef] font-medium">{study.stats}</span>
+                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                    <span className="flex items-center gap-1 hover:text-[#0e1012] transition-colors text-sm group-hover:text-[#00adef]">
+                                        Read Case Study <ArrowRight size={14} />
                                     </span>
                                 </div>
-                            </div>
-
-                            <h3 className="text-2xl font-bold text-[#0e1012] group-hover:text-[#00adef] transition-colors mb-2">
-                                {study.title}
-                            </h3>
-                            <div className="flex items-center gap-4 text-gray-500">
-                                <span className="text-[#00adef] font-medium">{study.stats}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                <Link href={study.link} className="flex items-center gap-1 hover:text-[#0e1012] transition-colors text-sm">
-                                    Read Case Study <ArrowRight size={14} />
-                                </Link>
-                            </div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>

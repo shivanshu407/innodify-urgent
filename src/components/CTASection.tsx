@@ -1,70 +1,78 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export function CTASection() {
     return (
         <section className="py-24 md:py-32 bg-white relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#00adef]/5 to-transparent" />
+            <div className="absolute inset-0">
+                <motion.div
+                    className="absolute w-[600px] h-[600px] rounded-full bg-[#00adef]/5 blur-3xl"
+                    style={{ top: '-30%', right: '-20%' }}
+                    animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                    className="absolute w-[400px] h-[400px] rounded-full bg-cyan-500/5 blur-3xl"
+                    style={{ bottom: '-20%', left: '-10%' }}
+                    animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                />
+            </div>
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-                    {/* Text */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="liquid-glass-glow rounded-3xl p-8 md:p-16 text-center relative overflow-hidden"
+                >
+                    {/* Shimmer effect */}
                     <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="max-w-xl"
-                    >
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#0e1012] leading-tight">
-                            Ready to elevate your{" "}
-                            <span className="text-[#00adef]">commerce</span> experience?
-                        </h2>
-                        <p className="mt-6 text-lg text-gray-600">
-                            Let&apos;s discuss how we can help transform your digital presence and
-                            drive measurable results.
-                        </p>
-                    </motion.div>
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00adef]/10 to-transparent -skew-x-12"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
+                    />
 
-                    {/* CTA Button */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                    >
-                        <a
-                            href="#contact"
-                            className="group relative inline-flex items-center justify-center w-40 h-40 md:w-48 md:h-48"
-                        >
-                            {/* Rotating text */}
-                            <svg
-                                className="absolute inset-0 w-full h-full animate-spin-slow"
-                                viewBox="0 0 100 100"
+                    <div className="relative z-10">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#0e1012] leading-tight">
+                            Ready to build something{" "}
+                            <span className="text-gradient-liquid">extraordinary</span>?
+                        </h2>
+                        <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+                            Let&apos;s discuss how we can help transform your ideas into exceptional digital products that drive real results.
+                        </p>
+
+                        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/contact-us"
+                                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white transition-all duration-300 relative overflow-hidden"
+                                style={{
+                                    background: 'linear-gradient(135deg, #00adef 0%, #00d4ff 50%, #00adef 100%)',
+                                }}
                             >
-                                <defs>
-                                    <path
-                                        id="ctaCircle"
-                                        d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0"
-                                    />
-                                </defs>
-                                <text className="text-[7px] uppercase tracking-[0.25em] fill-[#0e1012]">
-                                    <textPath href="#ctaCircle">
-                                        Start Your Project • Let&apos;s Talk • Start Your Project •
-                                    </textPath>
-                                </text>
-                            </svg>
-                            {/* Center button */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-24 h-24 md:w-28 md:h-28 bg-[#00adef] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[#00adef]/30">
-                                    <span className="text-lg font-bold text-[#0e1012]">Start</span>
-                                </div>
-                            </div>
-                        </a>
-                    </motion.div>
-                </div>
+                                {/* Shimmer */}
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12"
+                                    animate={{ x: ['-100%', '200%'] }}
+                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                />
+                                <span className="relative z-10">Start Your Project</span>
+                                <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+
+                            <Link
+                                href="/case-studies"
+                                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-[#0e1012] border-2 border-[#0e1012] hover:bg-[#0e1012] hover:text-white transition-all duration-300"
+                            >
+                                View Our Work
+                            </Link>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         </section>
     );

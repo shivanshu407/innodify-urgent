@@ -1,5 +1,4 @@
 import { HeroSection } from "@/components/HeroSection";
-import { IntroSection } from "@/components/IntroSection";
 import { ServicesSection } from "@/components/ServicesSection";
 import { PlatformsSection } from "@/components/PlatformsSection";
 import { CTASection } from "@/components/CTASection";
@@ -10,13 +9,11 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <IntroSection />
       <DarkStats />
+      <ServicesSection />
       <DarkCaseStudiesSection />
       <PlatformsSection />
-      <ServicesSection />
       <CTASection />
     </>
   );
 }
-
