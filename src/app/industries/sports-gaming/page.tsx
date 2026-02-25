@@ -1,9 +1,10 @@
 "use client";
 
+import { useRef, useEffect, useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import {
     Brain, MessageSquare, BarChart3, Globe, Smartphone, Cloud,
-    Gamepad2, Trophy, Zap, Users, Swords, Target, Joystick, Tv, ArrowRight
+    Gamepad2, Swords, Target, Joystick, Tv, ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 
@@ -65,86 +66,205 @@ const useCases = [
     { icon: Tv, title: "Live Streaming", description: "Interactive viewing experiences with real-time chat" },
 ];
 
+function MiniPongGame() {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const gameRef = useRef({
+        ballX: 150, ballY: 100,
+        ballDX: 2.5, ballDY: 2,
+        paddleY: 75, aiPaddleY: 75,
+        playerScore: 0, aiScore: 0,
+        running: true,
+    });
+
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleY = canvas.height / rect.height;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+        gameRef.current.paddleY = Math.max(0, Math.min(canvas.height - 50, mouseY - 25));
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleY = canvas.height / rect.height;
+        const touchY = (e.touches[0].clientY - rect.top) * scaleY;
+        gameRef.current.paddleY = Math.max(0, Math.min(canvas.height - 50, touchY - 25));
+    }, []);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        let animId: number;
+        const g = gameRef.current;
+
+        const draw = () => {
+            const W = canvas.width;
+            const H = canvas.height;
+
+            // Background
+            ctx.fillStyle = "#f5f3ff";
+            ctx.fillRect(0, 0, W, H);
+
+            // Center dashed line
+            ctx.setLineDash([4, 6]);
+            ctx.strokeStyle = "#c4b5fd";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(W / 2, 0);
+            ctx.lineTo(W / 2, H);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Ball
+            g.ballX += g.ballDX;
+            g.ballY += g.ballDY;
+
+            if (g.ballY <= 5 || g.ballY >= H - 5) g.ballDY *= -1;
+
+            // Player paddle collision (left)
+            if (g.ballX <= 18 && g.ballY >= g.paddleY && g.ballY <= g.paddleY + 50) {
+                g.ballDX = Math.abs(g.ballDX);
+                g.ballDY += (g.ballY - (g.paddleY + 25)) * 0.08;
+            }
+            // AI paddle collision (right)
+            if (g.ballX >= W - 18 && g.ballY >= g.aiPaddleY && g.ballY <= g.aiPaddleY + 50) {
+                g.ballDX = -Math.abs(g.ballDX);
+                g.ballDY += (g.ballY - (g.aiPaddleY + 25)) * 0.08;
+            }
+
+            // Scoring
+            if (g.ballX < 0) {
+                g.aiScore++;
+                g.ballX = W / 2; g.ballY = H / 2;
+                g.ballDX = 2.5; g.ballDY = 2;
+            }
+            if (g.ballX > W) {
+                g.playerScore++;
+                g.ballX = W / 2; g.ballY = H / 2;
+                g.ballDX = -2.5; g.ballDY = -2;
+            }
+
+            // AI movement
+            const aiCenter = g.aiPaddleY + 25;
+            if (aiCenter < g.ballY - 8) g.aiPaddleY += 1.8;
+            else if (aiCenter > g.ballY + 8) g.aiPaddleY -= 1.8;
+
+            // Draw paddles
+            ctx.fillStyle = "#7c3aed";
+            ctx.beginPath();
+            ctx.roundRect(6, g.paddleY, 8, 50, 4);
+            ctx.fill();
+
+            ctx.fillStyle = "#a78bfa";
+            ctx.beginPath();
+            ctx.roundRect(W - 14, g.aiPaddleY, 8, 50, 4);
+            ctx.fill();
+
+            // Draw ball
+            ctx.fillStyle = "#7c3aed";
+            ctx.beginPath();
+            ctx.arc(g.ballX, g.ballY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Score
+            ctx.fillStyle = "#c4b5fd";
+            ctx.font = "bold 24px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(String(g.playerScore), W / 2 - 25, 28);
+            ctx.fillText(String(g.aiScore), W / 2 + 25, 28);
+
+            animId = requestAnimationFrame(draw);
+        };
+
+        draw();
+        return () => cancelAnimationFrame(animId);
+    }, []);
+
+    return (
+        <motion.div
+            initial={{ x: 60, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative"
+        >
+            <canvas
+                ref={canvasRef}
+                width={300}
+                height={200}
+                onMouseMove={handleMouseMove}
+                onTouchMove={handleTouchMove}
+                className="rounded-2xl shadow-xl border-2 border-violet-200 cursor-none w-[300px] h-[200px] lg:w-[360px] lg:h-[240px]"
+            />
+            <div className="text-center mt-3">
+                <span className="text-xs text-violet-400 font-medium">Move mouse to play Pong</span>
+            </div>
+        </motion.div>
+    );
+}
+
 function HeroSection() {
     return (
         <section className="relative min-h-[80vh] flex items-center bg-white overflow-hidden pt-24">
-            {/* Animated gaming element */}
-            <div className="absolute right-[10%] lg:right-[15%] top-1/2 -translate-y-1/2 hidden md:block">
-                <motion.div
-                    className="relative"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                >
-                    <div className="w-48 h-48 bg-violet-100 rounded-3xl flex items-center justify-center">
-                        <Gamepad2 className="w-24 h-24 text-violet-500" />
-                    </div>
-                    {/* Floating elements */}
-                    {[
-                        { icon: Trophy, x: -60, y: -40, delay: 0.5 },
-                        { icon: Zap, x: 70, y: -20, delay: 0.7 },
-                        { icon: Users, x: 50, y: 60, delay: 0.9 },
-                    ].map((pos, i) => (
-                        <motion.div
-                            key={i}
-                            className="absolute w-12 h-12 bg-white rounded-lg shadow-lg flex items-center justify-center"
-                            style={{ left: `calc(50% + ${pos.x}px)`, top: `calc(50% + ${pos.y}px)` }}
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: pos.delay, type: "spring" }}
-                        >
-                            <pos.icon className="w-6 h-6 text-violet-500" />
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </div>
-
             <div className="container mx-auto px-6 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="max-w-2xl"
-                >
+                <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                     <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-2 mb-6"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="max-w-xl"
                     >
-                        <Gamepad2 className="w-4 h-4 text-violet-500" />
-                        <span className="text-sm text-violet-600 font-medium">Sports & Gaming Industry</span>
-                    </motion.div>
-
-                    <h1 className="text-5xl md:text-6xl font-serif text-[#0e1012] leading-tight">
-                        Level up your{" "}
-                        <span className="text-violet-500 italic">digital game</span>
-                    </h1>
-
-                    <p className="mt-6 text-xl text-gray-600 leading-relaxed">
-                        Build immersive gaming experiences, esports platforms, and
-                        fan engagement solutions that captivate millions of users.
-                    </p>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="mt-8"
-                    >
-                        <Link
-                            href="/contact-us"
-                            className="inline-flex items-center gap-3 bg-violet-500 text-white px-8 py-4 rounded-full font-semibold hover:bg-violet-600 transition-all shadow-lg shadow-violet-500/25"
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-2 mb-6"
                         >
-                            Discuss Your Project
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
+                            <Gamepad2 className="w-4 h-4 text-violet-500" />
+                            <span className="text-sm text-violet-600 font-medium">Sports & Gaming Industry</span>
+                        </motion.div>
+
+                        <h1 className="text-5xl md:text-6xl font-serif text-[#0e1012] leading-tight">
+                            Level up your{" "}
+                            <span className="text-violet-500 italic">digital game</span>
+                        </h1>
+
+                        <p className="mt-6 text-xl text-gray-600 leading-relaxed">
+                            Build immersive gaming experiences, esports platforms, and
+                            fan engagement solutions that captivate millions of users.
+                        </p>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="mt-8"
+                        >
+                            <Link
+                                href="/contact-us"
+                                className="inline-flex items-center gap-3 bg-violet-500 text-white px-8 py-4 rounded-full font-semibold hover:bg-violet-600 transition-all shadow-lg shadow-violet-500/25"
+                            >
+                                Discuss Your Project
+                                <ArrowRight className="w-5 h-5" />
+                            </Link>
+                        </motion.div>
                     </motion.div>
-                </motion.div>
+
+                    {/* Playable Mini Pong Game */}
+                    <div className="hidden md:block">
+                        <MiniPongGame />
+                    </div>
+                </div>
             </div>
         </section>
     );
 }
+
 
 function ServicesGrid() {
     return (
