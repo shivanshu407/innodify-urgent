@@ -69,6 +69,7 @@ const useCases = [
 function MiniPongGame() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [gameOver, setGameOver] = useState<null | "player" | "ai">(null);
+    const [locked, setLocked] = useState(false);
     const gameRef = useRef({
         ballX: 200, ballY: 110,
         ballDX: 1.5, ballDY: 1.2,
@@ -85,13 +86,45 @@ function MiniPongGame() {
         setGameOver(null);
     }, []);
 
-    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Request pointer lock on click
+    const handleCanvasClick = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || gameOver) return;
+        canvas.requestPointerLock();
+    }, [gameOver]);
+
+    // Track pointer lock state
+    useEffect(() => {
+        const onLockChange = () => {
+            setLocked(document.pointerLockElement === canvasRef.current);
+        };
+        document.addEventListener("pointerlockchange", onLockChange);
+        return () => document.removeEventListener("pointerlockchange", onLockChange);
+    }, []);
+
+    // Handle mouse movement — use relative movement when locked
+    useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleY = canvas.height / rect.height;
-        const mouseY = (e.clientY - rect.top) * scaleY;
-        gameRef.current.paddleY = Math.max(0, Math.min(canvas.height - 50, mouseY - 25));
+
+        const onMouseMove = (e: MouseEvent) => {
+            const g = gameRef.current;
+            const H = canvas.height;
+            if (document.pointerLockElement === canvas) {
+                // Pointer locked: use relative movement
+                const scaleY = canvas.height / canvas.getBoundingClientRect().height;
+                g.paddleY += e.movementY * scaleY;
+            } else {
+                // Not locked: use absolute position
+                const rect = canvas.getBoundingClientRect();
+                const scaleY = canvas.height / rect.height;
+                g.paddleY = (e.clientY - rect.top) * scaleY - 25;
+            }
+            g.paddleY = Math.max(0, Math.min(H - 50, g.paddleY));
+        };
+
+        canvas.addEventListener("mousemove", onMouseMove);
+        return () => canvas.removeEventListener("mousemove", onMouseMove);
     }, []);
 
     const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
@@ -166,10 +199,8 @@ function MiniPongGame() {
             // AI movement — predict where ball will arrive
             const aiSpeed = 1.6;
             if (g.ballDX > 0) {
-                // Ball coming toward AI — predict landing Y
                 const stepsToReach = (W - 18 - g.ballX) / g.ballDX;
                 let predictedY = g.ballY + g.ballDY * stepsToReach;
-                // Simulate bounces
                 while (predictedY < 0 || predictedY > H) {
                     if (predictedY < 0) predictedY = -predictedY;
                     if (predictedY > H) predictedY = 2 * H - predictedY;
@@ -180,7 +211,6 @@ function MiniPongGame() {
                     g.aiPaddleY += Math.sign(diff) * Math.min(aiSpeed, Math.abs(diff));
                 }
             } else {
-                // Ball moving away — drift toward center
                 const center = H / 2 - 25;
                 const diff = center - g.aiPaddleY;
                 if (Math.abs(diff) > 3) {
@@ -232,14 +262,20 @@ function MiniPongGame() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative"
         >
+            {/* Hint text above game */}
+            <div className="text-center mb-2">
+                <span className="text-xs text-violet-400 font-medium">
+                    {locked ? "Press Esc to release cursor" : "Click on the game to lock cursor"}
+                </span>
+            </div>
             <div className="relative">
                 <canvas
                     ref={canvasRef}
                     width={400}
                     height={220}
-                    onMouseMove={handleMouseMove}
+                    onClick={handleCanvasClick}
                     onTouchMove={handleTouchMove}
-                    className="rounded-2xl shadow-xl border-2 border-violet-200 cursor-none w-[400px] h-[220px] lg:w-[480px] lg:h-[264px]"
+                    className={`rounded-2xl shadow-xl border-2 border-violet-200 w-[400px] h-[220px] lg:w-[480px] lg:h-[264px] ${locked ? "cursor-none" : "cursor-pointer"}`}
                 />
 
                 {/* Game Over Overlay */}
@@ -259,9 +295,6 @@ function MiniPongGame() {
                         </button>
                     </div>
                 )}
-            </div>
-            <div className="text-center mt-3">
-                <span className="text-xs text-violet-400 font-medium">Move mouse to play Pong</span>
             </div>
         </motion.div>
     );
