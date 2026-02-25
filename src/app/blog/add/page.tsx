@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Upload, Trash2, Search, Bold, List, Type, Heading3, Heading4, Image as ImageIcon, Link as LinkIcon, Eye, Edit3, Search as SearchIcon, Settings } from "lucide-react";
+import { ArrowLeft, Save, Upload, Trash2, Search, Bold, List, Type, Heading3, Heading4, Image as ImageIcon, Link as LinkIcon, Eye, Edit3, Search as SearchIcon, Settings, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BlogPost, defaultBlogs } from "@/data/blogs";
 import { addBlog, deleteBlog, updateBlog } from "@/actions/blogActions";
 import BlogContentRenderer from "@/components/BlogContentRenderer";
@@ -14,6 +14,30 @@ type ViewMode = "edit" | "split" | "preview";
 
 export default function AddBlogPage() {
     const router = useRouter();
+
+    // Auth state
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loginUsername, setLoginUsername] = useState("");
+    const [loginPassword, setLoginPassword] = useState("");
+    const [loginError, setLoginError] = useState("");
+
+    useEffect(() => {
+        const auth = sessionStorage.getItem("blog_admin_auth");
+        if (auth === "true") {
+            setIsAuthenticated(true);
+        }
+    }, []);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (loginUsername === "admin" && loginPassword === "admin123") {
+            setIsAuthenticated(true);
+            sessionStorage.setItem("blog_admin_auth", "true");
+            setLoginError("");
+        } else {
+            setLoginError("Invalid username or password");
+        }
+    };
 
     const [editingSlug, setEditingSlug] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -140,6 +164,68 @@ export default function AddBlogPage() {
 
     const metaTitleLength = (formData.metaTitle || formData.title || "").length;
     const metaDescLength = (formData.metaDescription || formData.excerpt || "").length;
+
+    // Login Screen
+    if (!isAuthenticated) {
+        return (
+            <section className="relative min-h-screen bg-[#0e1012] flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0e1012] -z-10" />
+                <div className="absolute inset-0 opacity-20 -z-10">
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00adef]/20 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+                </div>
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-md mx-4"
+                >
+                    <div className="bg-[#15181c] rounded-2xl border border-[#2a2f36] p-8 shadow-2xl">
+                        <div className="flex flex-col items-center mb-8">
+                            <div className="w-16 h-16 rounded-full bg-[#00adef]/10 flex items-center justify-center mb-4">
+                                <Lock className="text-[#00adef]" size={28} />
+                            </div>
+                            <h1 className="text-2xl font-serif text-[#e5e7eb]">Admin Login</h1>
+                            <p className="text-sm text-[#6b7280] mt-2">Sign in to manage blog posts</p>
+                        </div>
+                        <form onSubmit={handleLogin} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">Username</label>
+                                <input
+                                    type="text"
+                                    value={loginUsername}
+                                    onChange={(e) => setLoginUsername(e.target.value)}
+                                    placeholder="Enter username"
+                                    required
+                                    className="w-full px-4 py-3 rounded-lg bg-[#0e1012] text-[#e5e7eb] placeholder:text-[#6b7280] border border-[#2a2f36] focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30 outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-[#b6bcc6] mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={loginPassword}
+                                    onChange={(e) => setLoginPassword(e.target.value)}
+                                    placeholder="Enter password"
+                                    required
+                                    className="w-full px-4 py-3 rounded-lg bg-[#0e1012] text-[#e5e7eb] placeholder:text-[#6b7280] border border-[#2a2f36] focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30 outline-none transition-all"
+                                />
+                            </div>
+                            {loginError && (
+                                <p className="text-red-400 text-sm text-center">{loginError}</p>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full bg-[#00adef] text-[#0e1012] font-semibold py-3 rounded-lg hover:bg-[#00adef]/90 active:scale-[0.99] transition-all"
+                            >
+                                Sign In
+                            </button>
+                        </form>
+                    </div>
+                </motion.div>
+            </section>
+        );
+    }
 
     return (
         <section className="relative min-h-screen bg-[#0e1012] py-24 overflow-hidden">
