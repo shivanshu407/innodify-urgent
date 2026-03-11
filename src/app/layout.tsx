@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       "AI, CRM, SaaS, Web & Mobile Solutions — Your Partner for Digital Transformation",
     images: ["/innodify-logo.svg"],
   },
+  verification: {
+    google: "bDPQ_R2wEipGjgrMe35hrppuYaprgq95_0krVVElMJI",
+  },
   robots: {
     index: true,
     follow: true,
