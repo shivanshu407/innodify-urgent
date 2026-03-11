@@ -37,6 +37,30 @@ const caseStudies = [
         image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
         stats: "100% Security",
         link: "/case-studies/mahalaxmi-real-estate"
+    },
+    {
+        id: "ustart-app",
+        title: "Ustart: Zero-Commission Ride Hailing",
+        category: "React Native",
+        image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80",
+        stats: "Native Performance",
+        link: "/case-studies/ustart"
+    },
+    {
+        id: "unisphere-exam",
+        title: "Unisphere: Highly Secure Exam Portal",
+        category: "Cloud Infra",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+        stats: "Kubernetes (EKS)",
+        link: "/case-studies/unisphere-exam-portal"
+    },
+    {
+        id: "unisphere-app",
+        title: "Unisphere: University Management System",
+        category: "Mobile App",
+        image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80",
+        stats: "5000+ Daily Users",
+        link: "/case-studies/unisphere-app"
     }
 ];
 
@@ -100,7 +124,7 @@ export function DarkCaseStudiesSection() {
                     </motion.div>
 
                     {/* Navigation buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 max-lg:hidden">
                         <motion.button
                             onClick={() => scroll("left")}
                             disabled={!canScrollLeft}

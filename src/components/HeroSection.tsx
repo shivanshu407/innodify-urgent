@@ -59,7 +59,7 @@ export function HeroSection() {
                 />
 
                 {/* Floating particles */}
-                {[...Array(6)].map((_, i) => (
+                {[...Array(3)].map((_, i) => (
                     <motion.div
                         key={i}
                         className="absolute w-2 h-2 rounded-full bg-[#00adef]/60"
@@ -128,7 +128,7 @@ export function HeroSection() {
                         >
                             <Link
                                 href="/contact-us"
-                                className="group relative inline-flex items-center justify-center px-8 py-4 rounded-full font-semibold text-[#0e1012] overflow-hidden transition-all duration-300"
+                                className="group relative inline-flex items-center justify-center px-8 py-4 rounded-full font-semibold text-[#0e1012] overflow-hidden transition-all duration-300 max-lg:w-full"
                                 style={{
                                     background: 'linear-gradient(135deg, #00adef 0%, #00d4ff 50%, #00adef 100%)',
                                 }}
@@ -137,14 +137,14 @@ export function HeroSection() {
                                 <motion.div
                                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12"
                                     animate={{ x: ['-100%', '200%'] }}
-                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                    transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 5 }}
                                 />
                                 <span className="relative z-10">Start Your Project</span>
                             </Link>
 
                             <Link
                                 href="/case-studies"
-                                className="inline-flex items-center justify-center px-8 py-4 rounded-full font-semibold text-white border-2 border-white/30 hover:border-[#00adef] hover:text-[#00adef] transition-all duration-300 backdrop-blur-sm"
+                                className="inline-flex items-center justify-center px-8 py-4 rounded-full font-semibold text-white border-2 border-white/30 hover:border-[#00adef] hover:text-[#00adef] transition-all duration-300 backdrop-blur-sm max-lg:w-full"
                             >
                                 View Our Work
                             </Link>
@@ -158,7 +158,7 @@ export function HeroSection() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1, delay: 1.2 }}
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 hidden md:block"
             >
                 <div className="relative">
                     <motion.div
