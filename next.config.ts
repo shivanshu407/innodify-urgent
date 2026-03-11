@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  serverExternalPackages: ['cloudinary'],
   reactCompiler: true,
   poweredByHeader: false,
   async headers() {
