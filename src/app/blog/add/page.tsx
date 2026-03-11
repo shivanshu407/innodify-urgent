@@ -43,6 +43,7 @@ export default function AddBlogPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState<EditorTab>("content");
     const [viewMode, setViewMode] = useState<ViewMode>("split");
+    const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState<Partial<BlogPost>>({
         author: "Innodify Admin",
         date: new Date().toLocaleDateString("en-US", {
@@ -99,6 +100,66 @@ export default function AddBlogPage() {
             );
         }, 0);
     };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                setFormData((prev) => ({ ...prev, image: data.url }));
+            } else {
+                alert("Upload failed: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Upload failed. Please try again.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleMarkdownImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        const alt = prompt("Enter image description (alt text):") || "";
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        try {
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await response.json();
+            
+            if (data.url) {
+                insertFormatting(`![${alt}](${data.url})`);
+            } else {
+                alert("Upload failed: " + (data.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Upload failed.");
+        }
+        
+        // Reset file input
+        e.target.value = "";
+    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -421,23 +482,34 @@ export default function AddBlogPage() {
                                             {/* Image URL */}
                                             <div>
                                                 <label className="block text-sm font-medium text-[#b6bcc6] mb-2">
-                                                    Featured Image URL
+                                                    Featured Image
                                                 </label>
                                                 <div className="flex gap-2">
                                                     <input
                                                         type="url"
                                                         name="image"
                                                         value={formData.image || ""}
-                                                        placeholder="https://example.com/image.jpg"
+                                                        placeholder="https://res.cloudinary.com/... or paste URL"
                                                         onChange={handleChange}
                                                         className="flex-1 px-4 py-3 rounded-lg bg-[#15181c] text-[#e5e7eb]
                                                             placeholder:text-[#6b7280] border border-[#2a2f36]
                                                             focus:border-[#00adef] focus:ring-2 focus:ring-[#00adef]/30
                                                             outline-none transition-all"
                                                     />
-                                                    <div className="px-4 py-3 bg-[#15181c] rounded-lg border border-[#2a2f36] text-[#6b7280]">
-                                                        <Upload size={20} />
-                                                    </div>
+                                                    <label className="px-4 py-3 bg-[#15181c] hover:bg-[#2a2f36] rounded-lg border border-[#2a2f36] text-[#6b7280] hover:text-[#00adef] transition-all cursor-pointer flex items-center justify-center">
+                                                        {uploading ? (
+                                                            <div className="w-5 h-5 border-2 border-[#00adef] border-t-transparent rounded-full animate-spin" />
+                                                        ) : (
+                                                            <Upload size={20} />
+                                                        )}
+                                                        <input 
+                                                            type="file" 
+                                                            accept="image/*" 
+                                                            onChange={handleImageUpload} 
+                                                            disabled={uploading}
+                                                            className="hidden" 
+                                                        />
+                                                    </label>
                                                 </div>
                                             </div>
 
@@ -481,20 +553,18 @@ export default function AddBlogPage() {
                                                         >
                                                             <List size={16} />
                                                         </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const url = prompt("Enter image URL:");
-                                                                const alt = prompt("Enter image description (alt text):");
-                                                                if (url) {
-                                                                    insertFormatting(`![${alt || ""}](${url})`);
-                                                                }
-                                                            }}
-                                                            className="p-1.5 hover:bg-[#2a2f36] rounded text-[#9ca3af] hover:text-[#00adef] transition-all"
-                                                            title="Insert Image"
+                                                        <label 
+                                                            className="p-1.5 hover:bg-[#2a2f36] rounded text-[#9ca3af] hover:text-[#00adef] transition-all cursor-pointer flex items-center justify-center" 
+                                                            title="Upload Image"
                                                         >
                                                             <ImageIcon size={16} />
-                                                        </button>
+                                                            <input 
+                                                                type="file" 
+                                                                accept="image/*" 
+                                                                onChange={handleMarkdownImageUpload}
+                                                                className="hidden" 
+                                                            />
+                                                        </label>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
